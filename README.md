@@ -1,7 +1,7 @@
 # Instituto Tecnológico de Costa Rica
 ## TI-4601 Bases de Datos Avanzados — entorno de estudiantes
 
-Entrega **Semana 2**, alineada a `bigdataclass/`:
+Entrega **Semana 2**:
 
 1. **Imagen de trabajo** (`Dockerfile`) — Python + `psycopg` (sin Spark).
 2. **Postgres oficial** (`scripts/up.sh`) — almacena y consulta el ejemplo.
