@@ -2,7 +2,7 @@
 ## TI-4601 Bases de Datos Avanzados — entorno de estudiantes
 
 Entrega **Semana 2**: Postgres efímero con `docker run` (estilo `bigdataclass/db`) y
-ejemplo `transactions/` en **Python puro** (misma progresión que Big Data, sin Spark).
+ejemplo `transactions/` en **Python puro**.
 
 Labs/clúster llegarán en actualizaciones posteriores del repo.
 
