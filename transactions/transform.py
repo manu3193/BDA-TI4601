@@ -1,36 +1,31 @@
 #!/usr/bin/env python3
-"""Paso 2 — transformar fechas (análogo a bigdataclass/transactions/transform.py)."""
+"""Paso 2 — transformar fechas en Postgres."""
 
 from __future__ import annotations
 
-from datetime import datetime
-from pathlib import Path
-
-from read import load_transactions
-
-ROOT = Path(__file__).resolve().parent
+from dbutil import fetch_all
 
 
-def transform(rows: list[dict]) -> list[dict]:
-    out = []
-    for row in rows:
-        purchased = datetime.fromisoformat(row["purchased_at"])
-        date_string = purchased.strftime("%m/%d/%Y")
-        out.append(
-            {
-                **row,
-                "date_string": date_string,
-                "date": datetime.strptime(date_string, "%m/%d/%Y").date(),
-            }
-        )
-    return out
+def transform() -> list[dict]:
+    return fetch_all(
+        """
+        SELECT
+          customer_id,
+          amount::float AS amount,
+          purchased_at,
+          to_char(purchased_at, 'MM/DD/YYYY') AS date_string,
+          purchased_at::date AS date
+        FROM transactions
+        ORDER BY customer_id, purchased_at
+        """
+    )
 
 
 if __name__ == "__main__":
-    rows = transform(load_transactions(ROOT / "transactions.csv"))
-    print("Con date_string y date tipada:\n")
+    rows = transform()
     cols = ["customer_id", "amount", "purchased_at", "date_string", "date"]
     print(" | ".join(cols))
     print("-" * 70)
     for row in rows:
         print(" | ".join(str(row[c]) for c in cols))
+    print(f"\n{len(rows)} filas (fuente: Postgres)")

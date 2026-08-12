@@ -1,24 +1,25 @@
+-- Esquema del ejemplo transactions (Semana 2).
 BEGIN;
 
-CREATE TABLE IF NOT EXISTS transactions (
-  id SERIAL PRIMARY KEY,
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS exchange_rates;
+
+CREATE TABLE transactions (
   customer_id integer NOT NULL,
-  amount integer NOT NULL,
+  amount numeric NOT NULL,
   purchased_at timestamp without time zone NOT NULL
 );
 
-TRUNCATE transactions RESTART IDENTITY;
+CREATE TABLE customers (
+  id integer PRIMARY KEY,
+  name text NOT NULL,
+  currency text NOT NULL
+);
 
-INSERT INTO transactions (customer_id, amount, purchased_at) VALUES
-(1, 55, '2020-03-01 09:00:00'),
-(1, 125, '2020-03-01 10:00:00'),
-(1, 32, '2020-03-02 13:00:00'),
-(1, 64, '2020-03-02 15:00:00'),
-(1, 128, '2020-03-03 10:00:00'),
-(2, 333, '2020-03-01 09:00:00'),
-(2, 334, '2020-03-01 09:01:00'),
-(2, 333, '2020-03-01 09:02:00'),
-(2, 11, '2020-03-03 20:00:00'),
-(2, 44, '2020-03-03 20:15:00');
+CREATE TABLE exchange_rates (
+  currency text PRIMARY KEY,
+  rate numeric NOT NULL
+);
 
 COMMIT;

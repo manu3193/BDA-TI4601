@@ -1,48 +1,30 @@
 # Guía de inicio — Semana 2
 
-Filosofía (`bigdataclass/`): **un script = una acción**, sin Compose “de producción”.
-
-## Requisitos
-
-Docker Engine, Python 3, Git. ~700 MB para `postgres:16`.
-
-## Pasos
+## Camino corto (recomendado)
 
 ```bash
-chmod +x scripts/*.sh transactions/*.sh
+chmod +x *.sh scripts/*.sh transactions/*.sh
+./build_image.sh
 make verify
 ```
 
-Qué comprueba:
+Éxito: `7 OK, 0 FAIL` y filas de `answer` (John/Jane).
 
-1. `docker`, `python3`, `curl`, `git`
-2. Contenedor `ti4601-postgres` responde (`pg_isready`)
-3. Python puede usar `csv` (stdlib)
-
-## Fallos comunes
-
-| Síntoma | Qué hacer |
-| --- | --- |
-| `docker` FAIL | Arrancar Docker |
-| Puerto ocupado | `POSTGRES_PORT=5434 ./scripts/up.sh` |
-| Postgres lento al primer pull | Esperar; `docker pull postgres:16` antes de clase |
-
-## Ejemplo transactions
+## Camino manual
 
 ```bash
-cd transactions
-./read.sh
-./transform.sh
-./aggregate.sh
-./join.sh
-./answer.sh
-```
-
-Python puro — **no** Spark.
-
-## SQL opcional
-
-```bash
+./build_image.sh
+./scripts/up.sh
 ./scripts/load_db.sh
-docker exec -it ti4601-postgres psql -U ti4601 -d ti4601
+make test-tx
+./scripts/down.sh
 ```
+
+O con shell interactivo:
+
+```bash
+./scripts/up.sh && ./scripts/load_db.sh && ./run_image.sh
+# dentro: cd transactions && ./read.sh && ./answer.sh
+```
+
+Detalle del ejemplo: `transactions/README.md`.

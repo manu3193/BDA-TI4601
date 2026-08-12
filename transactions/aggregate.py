@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
-"""Paso 3 — agregar monto por cliente y día (análogo a aggregate.py)."""
+"""Paso 3 — agregar monto por cliente y día en Postgres."""
 
 from __future__ import annotations
 
-from collections import defaultdict
-from pathlib import Path
-
-from read import load_transactions
-from transform import transform
-
-ROOT = Path(__file__).resolve().parent
+from dbutil import fetch_all
 
 
-def aggregate(rows: list[dict]) -> list[dict]:
-    totals: dict[tuple, float] = defaultdict(float)
-    for row in rows:
-        key = (row["customer_id"], row["date"])
-        totals[key] += row["amount"]
-    return [
-        {"customer_id": cid, "date": day, "amount": amount}
-        for (cid, day), amount in sorted(totals.items())
-    ]
+def aggregate() -> list[dict]:
+    return fetch_all(
+        """
+        SELECT
+          customer_id,
+          purchased_at::date AS date,
+          sum(amount)::float AS amount
+        FROM transactions
+        GROUP BY customer_id, purchased_at::date
+        ORDER BY customer_id, date
+        """
+    )
 
 
 if __name__ == "__main__":
-    rows = aggregate(transform(load_transactions(ROOT / "transactions.csv")))
+    rows = aggregate()
     print("customer_id | date | amount")
     print("-" * 40)
     for row in rows:
         print(f"{row['customer_id']} | {row['date']} | {row['amount']}")
+    print(f"\n{len(rows)} filas (fuente: Postgres)")

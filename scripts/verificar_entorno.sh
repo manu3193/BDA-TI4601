@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verifica prerrequisitos Semana 2. Un script = una acción.
+# Verifica prerrequisitos Semana 2 + smoke test transactions↔Postgres.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -28,7 +28,6 @@ echo
 echo "Herramientas host:"
 check "docker" docker version
 check "python3" python3 --version
-check "curl" curl --version
 check "git" git --version
 
 echo
@@ -38,7 +37,7 @@ if docker ps --format '{{.Names}}' | grep -qx "${NAME}"; then
   echo "  [OK]  contenedor ${NAME} en ejecución"
   ok=$((ok + 1))
   ready=0
-  for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+  for _ in $(seq 1 30); do
     if docker exec "${NAME}" pg_isready -U ti4601 >/dev/null 2>&1; then
       ready=1
       break
@@ -58,13 +57,32 @@ else
 fi
 
 echo
-echo "Ejemplo transactions (Python puro):"
-if python3 -c "import csv; print('ok')" >/dev/null 2>&1; then
-  echo "  [OK]  python3 + csv (stdlib)"
+echo "Imagen de trabajo (Dockerfile):"
+if docker image inspect ti4601 >/dev/null 2>&1; then
+  echo "  [OK]  imagen ti4601 presente"
+  ok=$((ok + 1))
+elif ./build_image.sh >/tmp/ti4601-build.log 2>&1; then
+  echo "  [OK]  imagen ti4601 construida"
   ok=$((ok + 1))
 else
-  echo "  [FAIL] python3"
+  echo "  [FAIL] no se pudo construir ti4601 (ver /tmp/ti4601-build.log)"
+  cat /tmp/ti4601-build.log | tail -20
   fail=$((fail + 1))
+fi
+
+if [[ "${fail}" -eq 0 ]]; then
+  echo
+  echo "Smoke test transactions ↔ Postgres:"
+  if ./scripts/test_transactions.sh >/tmp/ti4601-tx.log 2>&1; then
+    echo "  [OK]  pipeline read→answer contra Postgres"
+    ok=$((ok + 1))
+    # muestra el resultado final
+    tail -n 12 /tmp/ti4601-tx.log | sed 's/^/         /'
+  else
+    echo "  [FAIL] test_transactions (ver /tmp/ti4601-tx.log)"
+    tail -n 40 /tmp/ti4601-tx.log
+    fail=$((fail + 1))
+  fi
 fi
 
 echo
@@ -72,4 +90,4 @@ echo "Resultado: ${ok} OK, ${fail} FAIL"
 if [[ "${fail}" -gt 0 ]]; then
   exit 1
 fi
-echo "Entorno listo. Pruebe: cd transactions && ./read.sh"
+echo "Entorno listo."
