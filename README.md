@@ -26,13 +26,6 @@ cd transactions && ./read.sh && ./answer.sh
 
 **No es Lab 1.** Tarea 1 (Abadi) va por TEC Digital.
 
-## Por qué no hay `docker-compose` con volumes
-
-Como en Big Data: un `docker run` basta. No hace falta volumen nombrado, healthcheck,
-`mem_limit` ni init de extensiones para verificar entorno en Semana 2. Al hacer
-`./scripts/down.sh` el contenedor se elimina y los datos también (igual que
-`docker rm bigdata-db`).
-
 ## Qué hay
 
 | Ruta | Rol |
