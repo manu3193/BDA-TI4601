@@ -1,68 +1,51 @@
 # Instituto Tecnológico de Costa Rica
 ## TI-4601 Bases de Datos Avanzados — entorno de estudiantes
 
-Entrega **Semana 2**:
+Entorno alineado a `bigdataclass/`:
 
 1. **Imagen de trabajo** (`Dockerfile`) — Python + `psycopg` (sin Spark).
-2. **Postgres oficial** (`scripts/up.sh`) — almacena y consulta el ejemplo.
-3. **`transactions/`** — read→transform→aggregate→join→answer **contra Postgres**.
+2. **Postgres oficial** (`scripts/up.sh`) — `127.0.0.1:5433`, sin Compose ni volumes.
+3. **`transactions/`** — pipeline SQL contra Postgres (vía Docker).
 
 Copyright: Instituto Tecnológico de Costa Rica.
 
 ---
 
-## Requisitos
-
-- Docker Engine en ejecución
-- Git
-- ~1 GB libres para imágenes (`python:3.12-slim`, `postgres:16`)
-
-## Pasos de inicio a fin (validado)
+## Camino oficial (usar este)
 
 ```bash
 git clone <url-de-este-repo> ti4601
 cd ti4601
 chmod +x *.sh scripts/*.sh transactions/*.sh
-
-# 1) Imagen de trabajo (Python + psycopg)
 ./build_image.sh
-
-# 2) Verificación completa: Postgres + carga de datos + pipeline transactions
 make verify
 ```
 
-`make verify` debe terminar con `7 OK, 0 FAIL` y mostrar el resultado de `answer`
-(p. ej. John / 108000.0, Jane / 900.0).
+Éxito: varios `[OK]`, smoke test `answer` con John/Jane, y mensaje «Entorno listo».
 
-### Equivalente paso a paso (sin `make verify`)
+**No ejecute** `transactions/*.sh` directamente en el host: hace falta `psycopg` y la
+configuración de red correcta. Use `make test-tx` o `./run_image.sh`.
+
+### Equivalente desglosado
 
 ```bash
 ./build_image.sh
-./scripts/up.sh              # postgres:16 en localhost:5433
-./scripts/load_db.sh         # esquema + COPY de los CSV
-make test-tx                 # read → transform → aggregate → join → answer
+./scripts/up.sh                 # postgres:16 en 127.0.0.1:5433
+./scripts/load_db.sh            # esquema + COPY de CSV
+make test-tx                    # read→…→answer dentro de Docker
+./scripts/down.sh               # apaga/borra Postgres (datos efímeros)
 ```
 
-### Paso a paso manual dentro de la imagen
+### Shell interactivo (opcional)
 
 ```bash
-./scripts/up.sh
-./scripts/load_db.sh
+./scripts/up.sh && ./scripts/load_db.sh
 ./run_image.sh
+# dentro del contenedor ti4601:
+cd transactions && ./read.sh && ./answer.sh
 ```
 
-Dentro del contenedor `ti4601`:
-
-```bash
-cd transactions
-./read.sh
-./transform.sh
-./aggregate.sh
-./join.sh
-./answer.sh
-```
-
-Salida esperada de `./answer.sh`:
+Salida esperada de `answer`:
 
 ```text
 customer_id | name | date | adjusted_amount
@@ -74,46 +57,50 @@ customer_id | name | date | adjusted_amount
 2 | Jane | 2020-03-03 | 49.5
 ```
 
-### Apagar
-
-```bash
-./scripts/down.sh            # elimina el contenedor Postgres (datos efímeros)
-```
-
-**No es Lab 1.** Tarea 1 (Abadi) se entrega por TEC Digital.
-
 ## Credenciales Postgres
 
 | Parámetro | Valor |
 | --- | --- |
-| Host (desde su máquina) | `localhost` |
-| Host (desde `run_image.sh`) | `host.docker.internal` |
-| Puerto | `5433` |
+| Desde su máquina (`psql`) | `127.0.0.1:5433` |
+| Desde contenedores del curso | host `ti4601-postgres`, puerto `5432` (red Docker `ti4601`) |
 | Usuario / contraseña / BD | `ti4601` |
+| Puerto publicado en el host | `5433` (`POSTGRES_PORT` para cambiarlo) |
 
-## Piezas Docker (como Big Data)
+## Qué hace `make test-tx` (Docker)
 
-| Pieza | Rol |
-| --- | --- |
-| `Dockerfile` + `build_image.sh` / `run_image.sh` | Imagen de trabajo `ti4601` |
-| `scripts/up.sh` / `down.sh` | Subir / borrar `postgres:16` (sin Compose ni volumes) |
-| `scripts/load_db.sh` | Carga CSVs en Postgres |
-| `scripts/test_transactions.sh` | Prueba end-to-end (`make test-tx`) |
-| `make verify` | Chequeo de entorno + smoke test |
+Por cada paso (`read`, `transform`, `aggregate`, `join`, `answer`) equivale a:
 
-## Contenido
+```bash
+docker run --rm \
+  --network ti4601 \
+  -e PGHOST=ti4601-postgres \
+  -e PGPORT=5432 \
+  -e PGUSER=ti4601 \
+  -e PGPASSWORD=ti4601 \
+  -e PGDATABASE=ti4601 \
+  -v "$PWD":/src -w /src/transactions \
+  ti4601 python3 read.py
+```
+
+## Piezas
 
 | Ruta | Rol |
 | --- | --- |
-| `transactions/*.py` | Consultas SQL progresivas vía `psycopg` |
-| `db/initialize.sql` | Esquema |
-| `transactions/*.csv` | Semilla para `load_db` |
+| `Dockerfile` + `build_image.sh` / `run_image.sh` | Imagen `ti4601` |
+| `scripts/up.sh` / `down.sh` | Subir / borrar Postgres |
+| `scripts/load_db.sh` | Carga CSV → tablas |
+| `scripts/test_transactions.sh` | E2E (`make test-tx`) |
+| `make verify` | Entorno + smoke test |
+| `transactions/*.csv` | Semilla solo para `load_db` |
 
 ## Fallos comunes
 
 | Síntoma | Qué hacer |
 | --- | --- |
-| `docker` FAIL | Arrancar Docker Desktop / Engine |
-| Puerto 5433 ocupado | `POSTGRES_PORT=5434 ./scripts/up.sh` y el mismo valor en el entorno al correr el pipeline |
-| Build lento | Primera vez descarga imágenes base; reintentar |
-| `connection refused` desde `run_image.sh` | Verificar `./scripts/up.sh` y que Postgres responda en `:5433` |
+| `docker` FAIL | Arrancar Docker Engine / Desktop |
+| Puerto ocupado | `POSTGRES_PORT=5434 ./scripts/up.sh` (y el mismo valor en `make test-tx`) |
+| Contenedor viejo / puerto distinto | `./scripts/down.sh` y otra vez `./scripts/up.sh` |
+| `connection refused` | `./scripts/down.sh && ./scripts/up.sh && ./scripts/load_db.sh` |
+| Firewall (Fedora) | El puerto solo escucha en `127.0.0.1`; el pipeline usa red Docker |
+| `ModuleNotFoundError: psycopg` en el host | Normal: use Docker, no Python del host |
+| Build lento | Primera vez descarga `python:3.12-slim` / `postgres:16` |

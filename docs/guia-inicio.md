@@ -1,6 +1,6 @@
-# Guía de inicio — Semana 2
+# Guía de inicio
 
-## Camino corto (recomendado)
+## Camino oficial
 
 ```bash
 chmod +x *.sh scripts/*.sh transactions/*.sh
@@ -8,23 +8,25 @@ chmod +x *.sh scripts/*.sh transactions/*.sh
 make verify
 ```
 
-Éxito: `7 OK, 0 FAIL` y filas de `answer` (John/Jane).
+Éxito: smoke test `answer` (John/Jane) y «Entorno listo».
 
-## Camino manual
+No corra `transactions/*.py` en el host sin Docker.
+
+## Manual
 
 ```bash
 ./build_image.sh
-./scripts/up.sh
+./scripts/up.sh          # 127.0.0.1:5433
 ./scripts/load_db.sh
 make test-tx
 ./scripts/down.sh
 ```
 
-O con shell interactivo:
+Interactivo:
 
 ```bash
 ./scripts/up.sh && ./scripts/load_db.sh && ./run_image.sh
 # dentro: cd transactions && ./read.sh && ./answer.sh
 ```
 
-Detalle del ejemplo: `transactions/README.md`.
+Detalle: `transactions/README.md` · fallos: README raíz.
