@@ -1,14 +1,15 @@
 .PHONY: help verify up down load-db build run test-tx
 
 help:
-	@echo "TI-4601 · entorno Semana 2:"
-	@echo "  make build      Construye imagen ti4601 (Dockerfile)"
-	@echo "  make run        Entra a la imagen de trabajo"
-	@echo "  make up         Levanta Postgres (imagen oficial)"
-	@echo "  make load-db    Carga CSVs de transactions en Postgres"
-	@echo "  make test-tx    Prueba end-to-end transactions↔Postgres"
-	@echo "  make verify     Verifica entorno + smoke test transactions"
-	@echo "  make down       Elimina el contenedor Postgres"
+	@echo "TI-4601 · camino oficial: ./build_image.sh && make verify"
+	@echo "  make build      Construye imagen ti4601"
+	@echo "  make verify     Entorno + smoke test (Docker)"
+	@echo "  make test-tx    Solo pipeline transactions↔Postgres"
+	@echo "  make up         Levanta Postgres (127.0.0.1:5433)"
+	@echo "  make load-db    Carga CSVs en Postgres"
+	@echo "  make run        Shell en imagen ti4601"
+	@echo "  make down       Elimina contenedor Postgres"
+	@echo "No use transactions/*.sh en el host; use make test-tx o make run."
 
 build:
 	chmod +x build_image.sh

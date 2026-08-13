@@ -1,12 +1,11 @@
 #!/bin/bash
-# Una acción: entrar a la imagen de trabajo (código montado en /src).
-# Habla con Postgres del host en host.docker.internal:5433
+# Shell en la imagen de trabajo (misma red Docker que Postgres).
 docker run --rm -it \
+  --network ti4601 \
   -v "$(pwd)":/src \
   -w /src \
-  --add-host=host.docker.internal:host-gateway \
-  -e PGHOST=host.docker.internal \
-  -e PGPORT="${POSTGRES_PORT:-5433}" \
+  -e PGHOST=ti4601-postgres \
+  -e PGPORT=5432 \
   -e PGUSER=ti4601 \
   -e PGPASSWORD=ti4601 \
   -e PGDATABASE=ti4601 \

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Prueba end-to-end: Postgres oficial + pipeline transactions.
+# Prueba end-to-end: Postgres oficial + pipeline transactions (misma red Docker).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT}"
 
+NET=ti4601
 chmod +x scripts/*.sh transactions/*.sh build_image.sh run_image.sh
 
 echo "==> Postgres arriba + carga de datos"
@@ -18,9 +19,9 @@ run_step() {
   local step="$1"
   echo "==> transactions/${step}"
   docker run --rm \
-    --add-host=host.docker.internal:host-gateway \
-    -e PGHOST=host.docker.internal \
-    -e PGPORT="${POSTGRES_PORT:-5433}" \
+    --network "${NET}" \
+    -e PGHOST=ti4601-postgres \
+    -e PGPORT=5432 \
     -e PGUSER=ti4601 \
     -e PGPASSWORD=ti4601 \
     -e PGDATABASE=ti4601 \
