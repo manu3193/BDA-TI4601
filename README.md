@@ -1,106 +1,75 @@
 # Instituto Tecnológico de Costa Rica
+
 ## TI-4601 Bases de Datos Avanzados — entorno de estudiantes
 
-Entorno alineado a `bigdataclass/`:
-
-1. **Imagen de trabajo** (`Dockerfile`) — Python + `psycopg` (sin Spark).
-2. **Postgres oficial** (`scripts/up.sh`) — `127.0.0.1:5433`, sin Compose ni volumes.
-3. **`transactions/`** — pipeline SQL contra Postgres (vía Docker).
+Orquestación con Docker Compose.
 
 Copyright: Instituto Tecnológico de Costa Rica.
 
 ---
 
-## Camino oficial (usar este)
+## Guía de ejecución
 
 ```bash
-git clone <url-de-este-repo> ti4601
-cd ti4601
-chmod +x *.sh scripts/*.sh transactions/*.sh
-./build_image.sh
-make verify
+git clone <url> ti4601 && cd ti4601
+make up          # postgres + volumen + seed en initdb
+make verify      # smoke test pipeline ACID
 ```
 
-Éxito: varios `[OK]`, smoke test `answer` con John/Jane, y mensaje «Entorno listo».
-
-**No ejecute** `transactions/*.sh` directamente en el host: hace falta `psycopg` y la
-configuración de red correcta. Use `make test-tx` o `./run_image.sh`.
-
-### Equivalente desglosado
+Éxito: saldo/filas de John y Jane en `answer`, mensaje «Entorno listo».
 
 ```bash
-./build_image.sh
-./scripts/up.sh                 # postgres:16 en 127.0.0.1:5433
-./scripts/load_db.sh            # esquema + COPY de CSV
-make test-tx                    # read→…→answer dentro de Docker
-./scripts/down.sh               # apaga/borra Postgres (datos efímeros)
+make test-tx
+make lab-concurrency ISOLATION=READ_COMMITTED
+make lab-concurrency ISOLATION=SERIALIZABLE
+make shell       # PGHOST=postgres inyectado por Compose
 ```
 
-### Shell interactivo (opcional)
 
-```bash
-./scripts/up.sh && ./scripts/load_db.sh
-./run_image.sh
-# dentro del contenedor ti4601:
-cd transactions && ./read.sh && ./answer.sh
-```
 
-Salida esperada de `answer`:
+## Credenciales (inyectadas; no hardcodear en código)
 
-```text
-customer_id | name | date | adjusted_amount
---------------------------------------------------
-1 | John | 2020-03-01 | 108000.0
-1 | John | 2020-03-02 | 57600.0
-1 | John | 2020-03-03 | 76800.0
-2 | Jane | 2020-03-01 | 900.0
-2 | Jane | 2020-03-03 | 49.5
-```
 
-## Credenciales Postgres
+| Variable     | Postgres (`app`) | Cockroach (`app-crdb`) |
+| ------------ | ---------------- | ---------------------- |
+| `PGHOST`     | `postgres`       | `crdb-1`               |
+| `PGPORT`     | `5432`           | `26257`                |
+| `PGUSER`     | `ti4601`         | `root`                 |
+| `PGPASSWORD` |                  |                        |
+| `PGDATABASE` | `ti4601`         | `ti4601`               |
 
-| Parámetro | Valor |
-| --- | --- |
-| Desde su máquina (`psql`) | `127.0.0.1:5433` |
-| Desde contenedores del curso | host `ti4601-postgres`, puerto `5432` (red Docker `ti4601`) |
-| Usuario / contraseña / BD | `ti4601` |
-| Puerto publicado en el host | `5433` (`POSTGRES_PORT` para cambiarlo) |
 
-## Qué hace `make test-tx` (Docker)
+Desde el host (opcional): `psql` a `127.0.0.1:5433`. 
 
-Por cada paso (`read`, `transform`, `aggregate`, `join`, `answer`) equivale a:
+## Persistencia
 
-```bash
-docker run --rm \
-  --network ti4601 \
-  -e PGHOST=ti4601-postgres \
-  -e PGPORT=5432 \
-  -e PGUSER=ti4601 \
-  -e PGPASSWORD=ti4601 \
-  -e PGDATABASE=ti4601 \
-  -v "$PWD":/src -w /src/transactions \
-  ti4601 python3 read.py
-```
+Datos Postgres viven en el volumen `pgdata`.  Para eliminar volúmenes use: `make down -v` .
 
-## Piezas
+Para volver a levantar use `make up` (vuelve a correr `/docker-entrypoint-initdb.d`).
 
-| Ruta | Rol |
-| --- | --- |
-| `Dockerfile` + `build_image.sh` / `run_image.sh` | Imagen `ti4601` |
-| `scripts/up.sh` / `down.sh` | Subir / borrar Postgres |
-| `scripts/load_db.sh` | Carga CSV → tablas |
-| `scripts/test_transactions.sh` | E2E (`make test-tx`) |
-| `make verify` | Entorno + smoke test |
-| `transactions/*.csv` | Semilla solo para `load_db` |
+## Archivos principales
+
+
+| Ruta                   | Rol                                       |
+| ---------------------- | ----------------------------------------- |
+| `docker-compose.yml`   | Red `ti4601`, postgres, app, clúster lab1 |
+| `db/init/`             | Schema + CSV → `initdb`                   |
+| `transactions/`        | Pipeline ACID                             |
+| `labs/01-concurrency/` | Estrés de aislamiento                     |
+| `Makefile`             | Única interfaz operativa                  |
+
+
+
 
 ## Fallos comunes
 
-| Síntoma | Qué hacer |
-| --- | --- |
-| `docker` FAIL | Arrancar Docker Engine / Desktop |
-| Puerto ocupado | `POSTGRES_PORT=5434 ./scripts/up.sh` (y el mismo valor en `make test-tx`) |
-| Contenedor viejo / puerto distinto | `./scripts/down.sh` y otra vez `./scripts/up.sh` |
-| `connection refused` | `./scripts/down.sh && ./scripts/up.sh && ./scripts/load_db.sh` |
-| Firewall (Fedora) | El puerto solo escucha en `127.0.0.1`; el pipeline usa red Docker |
-| `ModuleNotFoundError: psycopg` en el host | Normal: use Docker, no Python del host |
-| Build lento | Primera vez descarga `python:3.12-slim` / `postgres:16` |
+
+| Síntoma                    | Qué hacer                                               |
+| -------------------------- | ------------------------------------------------------- |
+| init no carga CSV          | Volumen viejo: `make down-v && make up`                 |
+| `connection refused`       | `make up` y esperar healthcheck                         |
+| Puerto 5433 ocupado        | cambiar puerto en .env                                  |
+| `psycopg` en el host       | Use `make shell` / `compose run`; no el Python del host |
+| CRDB “already initialized” | Normal tras el primer `lab1-up`                         |
+
+

@@ -1,0 +1,146 @@
+# TI-4601 — orquestación declarativa
+#
+# Perfiles:
+#   (ninguno)  postgres          → Semanas 2–4 + lab concurrencia
+#   lab1       cockroachdb ×3    → Lab 1 (S5) y P1 (S5–S8)
+#
+# Cliente Python: siempre vía `docker compose run --rm app …`
+# (Compose habilita el perfil del servicio target automáticamente).
+
+name: ti4601
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: ti4601-postgres
+    environment:
+      POSTGRES_USER: ti4601
+      POSTGRES_PASSWORD: ti4601
+      POSTGRES_DB: ti4601
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ti4601 -d ti4601"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    networks:
+      - curso
+
+  app:
+    build: .
+    image: ti4601:local
+    working_dir: /src
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGUSER: ti4601
+      PGPASSWORD: ti4601
+      PGDATABASE: ti4601
+      TI4601_ENGINE: postgres
+    volumes:
+      - .:/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - curso
+    profiles: ["client"]
+
+  crdb-1:
+    image: cockroachdb/cockroach:v24.2.4
+    profiles: ["lab1"]
+    container_name: ti4601-crdb-1
+    hostname: crdb-1
+    command: start --insecure --advertise-addr=crdb-1 --join=crdb-1,crdb-2,crdb-3 --cache=256MiB --max-sql-memory=256MiB
+    volumes:
+      - crdb1:/cockroach/cockroach-data
+    ports:
+      - "127.0.0.1:26257:26257"
+      - "127.0.0.1:8080:8080"
+    networks:
+      - curso
+
+  crdb-2:
+    image: cockroachdb/cockroach:v24.2.4
+    profiles: ["lab1"]
+    container_name: ti4601-crdb-2
+    hostname: crdb-2
+    command: start --insecure --advertise-addr=crdb-2 --join=crdb-1,crdb-2,crdb-3 --cache=256MiB --max-sql-memory=256MiB
+    volumes:
+      - crdb2:/cockroach/cockroach-data
+    networks:
+      - curso
+
+  crdb-3:
+    image: cockroachdb/cockroach:v24.2.4
+    profiles: ["lab1"]
+    container_name: ti4601-crdb-3
+    hostname: crdb-3
+    command: start --insecure --advertise-addr=crdb-3 --join=crdb-1,crdb-2,crdb-3 --cache=256MiB --max-sql-memory=256MiB
+    volumes:
+      - crdb3:/cockroach/cockroach-data
+    networks:
+      - curso
+
+  crdb-init:
+    image: cockroachdb/cockroach:v24.2.4
+    profiles: ["lab1"]
+    container_name: ti4601-crdb-init
+    depends_on:
+      - crdb-1
+      - crdb-2
+      - crdb-3
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        for i in $$(seq 1 90); do
+          if cockroach init --insecure --host=crdb-1 2>/dev/null; then
+            echo "cluster initialized"
+            break
+          fi
+          if cockroach sql --insecure --host=crdb-1 -e 'SELECT 1' >/dev/null 2>&1; then
+            echo "cluster already up"
+            break
+          fi
+          sleep 1
+        done
+        cockroach sql --insecure --host=crdb-1 -e "CREATE DATABASE IF NOT EXISTS ti4601;"
+    networks:
+      - curso
+    restart: "no"
+
+  app-crdb:
+    build: .
+    image: ti4601:local
+    profiles: ["lab1"]
+    working_dir: /src
+    environment:
+      PGHOST: crdb-1
+      PGPORT: "26257"
+      PGUSER: root
+      PGPASSWORD: ""
+      PGDATABASE: ti4601
+      PGSSLMODE: disable
+      TI4601_ENGINE: cockroach
+    volumes:
+      - .:/src
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+    networks:
+      - curso
+
+volumes:
+  pgdata:
+  crdb1:
+  crdb2:
+  crdb3:
+
+networks:
+  curso:
+    name: ti4601
