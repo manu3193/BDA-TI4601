@@ -1,5 +1,5 @@
-# Imagen de trabajo del estudiante (análogo a bigdataclass/Dockerfile).
-# Postgres es la imagen oficial vía scripts/up.sh.
+# Imagen de trabajo del estudiante (cliente Python + psycopg).
+# El motor de datos lo define docker-compose.yml (postgres | cockroach).
 FROM python:3.12-slim
 
 RUN apt-get update \

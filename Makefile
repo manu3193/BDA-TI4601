@@ -1,40 +1,62 @@
-.PHONY: help verify up down load-db build run test-tx
+# Instituto Tecnológico de Costa Rica — TI-4601
+# Interfaz operativa genérica (Compose). Smoke tests = documentados en README, no targets.
+
+.PHONY: help up down down-v build shell test-tx lab-concurrency \
+	lab1-up lab1-down lab1-down-v lab1-shell reset-pg
+
+COMPOSE := docker compose
+ISOLATION ?= READ_COMMITTED
+WORKERS ?= 40
+RETRIES ?= 8
 
 help:
-	@echo "TI-4601 · camino oficial: ./build_image.sh && make verify"
-	@echo "  make build      Construye imagen ti4601"
-	@echo "  make verify     Entorno + smoke test (Docker)"
-	@echo "  make test-tx    Solo pipeline transactions↔Postgres"
-	@echo "  make up         Levanta Postgres (127.0.0.1:5433)"
-	@echo "  make load-db    Carga CSVs en Postgres"
-	@echo "  make run        Shell en imagen ti4601"
-	@echo "  make down       Elimina contenedor Postgres"
-	@echo "No use transactions/*.sh en el host; use make test-tx o make run."
-
-build:
-	chmod +x build_image.sh
-	./build_image.sh
-
-run: build
-	chmod +x run_image.sh
-	./run_image.sh
+	@echo "TI-4601 · entorno"
+	@echo "  make up | down | down-v | build | shell | reset-pg"
+	@echo "  make test-tx"
+	@echo "  make lab-concurrency ISOLATION=READ_COMMITTED|SERIALIZABLE"
+	@echo "  Lab 1: make lab1-up | lab1-shell | lab1-down | lab1-down-v"
+	@echo ""
+	@echo "Smoke test (manual): ver README.md § Verificar el entorno"
+	@echo "Docs: labs/README.md · labs/lab0-concurrency/ · labs/lab1-cluster/"
 
 up:
-	chmod +x scripts/up.sh
-	./scripts/up.sh
+	$(COMPOSE) up -d postgres
 
 down:
-	chmod +x scripts/down.sh
-	./scripts/down.sh
+	$(COMPOSE) down --remove-orphans
 
-load-db:
-	chmod +x scripts/load_db.sh
-	./scripts/load_db.sh
+down-v:
+	$(COMPOSE) down -v --remove-orphans
 
-test-tx:
-	chmod +x scripts/test_transactions.sh
-	./scripts/test_transactions.sh
+build:
+	$(COMPOSE) build app
 
-verify:
-	chmod +x scripts/*.sh transactions/*.sh build_image.sh run_image.sh
-	./scripts/verificar_entorno.sh
+shell: up
+	$(COMPOSE) run --rm app bash
+
+reset-pg: down-v up
+	@echo "Volumen recreado; initdb volvió a cargar CSV."
+
+test-tx: up
+	$(COMPOSE) run --rm app python3 transactions/read.py
+	$(COMPOSE) run --rm app python3 transactions/transform.py
+	$(COMPOSE) run --rm app python3 transactions/aggregate.py
+	$(COMPOSE) run --rm app python3 transactions/join.py
+	$(COMPOSE) run --rm app python3 transactions/answer.py
+
+lab-concurrency: up
+	$(COMPOSE) run --rm -e ISOLATION=$(ISOLATION) -e WORKERS=$(WORKERS) -e RETRIES=$(RETRIES) \
+		app python3 labs/lab0-concurrency/stress.py --isolation $(ISOLATION) --workers $(WORKERS) --retries $(RETRIES)
+
+lab1-up:
+	$(COMPOSE) --profile lab1 up -d crdb-1 crdb-2 crdb-3
+	$(COMPOSE) --profile lab1 up crdb-init
+
+lab1-down:
+	$(COMPOSE) --profile lab1 down
+
+lab1-down-v:
+	$(COMPOSE) --profile lab1 down -v
+
+lab1-shell:
+	$(COMPOSE) --profile lab1 run --rm app-crdb bash
