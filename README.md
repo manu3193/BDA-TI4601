@@ -82,7 +82,7 @@ docker run --rm \
   ti4601 python3 read.py
 ```
 
-## Piezas
+## Archivos importantes
 
 | Ruta | Rol |
 | --- | --- |
