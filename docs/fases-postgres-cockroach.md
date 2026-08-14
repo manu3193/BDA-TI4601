@@ -9,14 +9,14 @@ Cockroach en S3.
 ## Solución: tres fases, un mismo cliente Python
 
 ```text
-S2–S4  Fase A · postgres     diseño P1 + ACID + lab concurrencia
+S2–S4  Fase A · postgres     ACID + Lab 0 (S3) + diseño P1
 S5     Fase B · lab1 (CRDB)  primer contacto guiado (Lab 1 = on-ramp)
-S5–S8  Fase C · lab1 (CRDB)  construcción y mediciones del P1
+S5–S8  Fase C · lab1 (CRDB)  construcción y mediciones del P1 (+ Lab 2 en S7)
 ```
 
 | Fase | Compose | Qué hacen | Qué no hacen |
 | --- | --- | --- | --- |
-| **A** | `make up` (Postgres + volumen) | Pipeline `transactions/`, lab concurrencia, **diseño** P1 (E1), prototipo de esquema en SQL portable | Montar Raft / matar nodos |
+| **A** | `make up` (Postgres + volumen) | Pipeline `transactions/`, **Lab 0 en S3**, **diseño** P1 (E1), prototipo SQL portable | Montar Raft / matar nodos · Lab 0 no es entrega de S2 |
 | **B** | `make lab1-up` | Lab 1: 3 nodos, localities, latencia, falla de nodo **con guía** | Entregar P1 completo el mismo día |
 | **C** | mismo `lab1` | P1 E2–E5 sobre el clúster ya conocido | Cambiar de motor sin aprobación |
 
