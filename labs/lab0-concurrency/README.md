@@ -47,21 +47,21 @@ Corra **dos** experimentos con el mismo `WORKERS` (recomendado 40). Complete:
 
 | Métrica | Símbolo | READ COMMITTED | SERIALIZABLE | Cómo leerla |
 | --- | --- | --- | --- | --- |
-| Workers lanzados | \(W\) | | | parámetro |
-| Commits OK | \(OK\) | | | línea del script |
-| SerializationFailure | \(SF\) | | | línea del script (suele ser 0 en RC) |
+| Workers lanzados | $\(W\)$ | | | parámetro |
+| Commits OK | $\(OK\)$ | | | línea del script |
+| SerializationFailure | $\(SF\)$ | | | línea del script (suele ser 0 en RC) |
 | Otros errores | | | | debe ser ~0 |
-| Saldo final | \(S\) | | | línea del script |
-| Esperado si cada OK −1 | \(E = 1000 - OK\) | | | lo imprime el script |
-| Lost updates (aprox.) | \(L \approx S - E\) si \(S > E\) | | | en RC suele ser ≫ 0 |
-| ¿\(S \approx E\)? | | | | RC: no · SER: sí |
+| Saldo final | $\(S\)$ | | | línea del script |
+| Esperado si cada OK −1 | $\(E = 1000 - OK\)$ | | | lo imprime el script |
+| Lost updates (aprox.) | $\(L \approx S - E\)$ si $\(S > E\)$ | | | en RC suele ser ≫ 0 |
+| ¿$\(S \approx E\)$? | | | | RC: no · SER: sí |
 
 **Comparaciones que deben escribir en el informe:**
 
-1. \(S_{RC}\) vs \(E_{RC}\): si \(S_{RC} \gg E_{RC}\), hubo lost update.  
-2. \(SF_{RC}\) vs \(SF_{SER}\): en SER debe dispararse.  
-3. \(S_{SER}\) vs \(E_{SER}\): deben coincidir (salvo `otros errores` o retries agotados).  
-4. \(OK_{SER}\) vs \(W\): con retries finitos, a veces \(OK < W\); eso también es dato.
+1. $\(S_{RC}\)$ vs $\(E_{RC}\)$: si \(S_{RC} \gg E_{RC}\), hubo lost update.  
+2. $\(SF_{RC}\)$ vs $\(SF_{SER}\)$: en SER debe dispararse.  
+3. $\(S_{SER}\)$ vs $\(E_{SER}\)$: deben coincidir (salvo `otros errores` o retries agotados).  
+4. $\(OK_{SER}\)$ vs $\(W\)$: con retries finitos, a veces $\(OK < W\)$; eso también es dato.
 
 Guarden salidas crudas: `evidence/rc.txt` y `evidence/serializable.txt`.
 
@@ -99,8 +99,8 @@ corresponde a una resta que “sobrevivió”; por eso \(S = 1000 - OK\).
 
 | Síntoma | Causa probable |
 | --- | --- |
-| RC con \(S \approx E\) | Poca concurrencia efectiva (baje sleep / suba workers) o corrida rara |
-| SER con \(S \neq E\) | Retries agotados (`otros errores` o SF altos y OK bajos) → suba `RETRIES` |
+| RC con $\(S \approx E\)$ | Poca concurrencia efectiva (baje sleep / suba workers) o corrida rara |
+| SER con $\(S \neq E\)$ | Retries agotados (`otros errores` o SF altos y OK bajos) → suba `RETRIES` |
 | `connection refused` | No hizo `make up` / usó Python del host |
 
 ---
@@ -118,7 +118,7 @@ No reescriban el script; deben **explicarlo** en el informe (½ pág).
 | `except errors.SerializationFailure` | Contador \(SF\) + reintento | Abort serializable |
 | `delay = 2^(attempt-1) * … + jitter` | Backoff exponencial | Evitar thundering herd |
 | `threading.Thread` × `WORKERS` | Ráfaga concurrente real | Carrera |
-| `E = 1000 - OK` vs `S` | Oráculo de atomicidad aparente | Qué comparar |
+| `E = 1000 - OK` vs `S` | Atomicidad aparente | Qué comparar |
 
 Fragmento central (idea):
 
@@ -160,8 +160,8 @@ docker compose run --rm app python3 labs/lab0-concurrency/stress.py \
 ### 6.3 Informe
 
 1. Tabla de la sección 3 completa.  
-2. Debe discutir las condiciones de carrera encontradas: por qué \(S \gg E\) (o por qué no, si no salió).  
-3. Debe discutir la serialización aplicada y su efecto: rol de \(SF\) y por qué \(S \approx E\).  
+2. Debe discutir las condiciones de carrera encontradas: por qué $\(S \gg E\)$ (o por qué no, si no salió).  
+3. Debe discutir la serialización aplicada y su efecto: rol de $\(SF\)$ y por qué $\(S \approx E\)$.  
 4. Debe explicar el código: explique el RMW + isolation + retry.  
 
 ---
