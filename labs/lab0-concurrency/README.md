@@ -1,27 +1,24 @@
 # Lab 0 — Concurrencia: Lost Update vs SERIALIZABLE
 
-**Semana práctica:** 3 · **No es el Laboratorio 1** (eso es [`../lab1-cluster/`](../lab1-cluster/), S5).  
+**Semana 3:**
 **Motor:** Postgres (`make up`).  
-**Teoría previa (obligatoria en clase, Bloque 3 de S2):** niveles de aislamiento,
-anomalías (lost update), MVCC a alto nivel, y que la C de ACID ≠ C de CAP/PACELC.
-En S3 solo se **mide** (\(S\) vs \(E\)); no se vuelve a dictar la teoría.
 
 Índice: [`../README.md`](../README.md).
 
 ---
 
-## 1. Para qué sirve este lab (aprendizaje)
+## 1. Objetivo
 
-Van a **provocar** una anomalía que en el pizarrón solo se nombra, y luego ver cómo el
-motor la evita subiendo el aislamiento —a costa de abortar transacciones.
+Van a **provocar** una anomalía en la base de datos, y luego van a ver ver cómo el
+motor la evita subiendo el aislamiento, a costa de abortar transacciones.
 
 | Concepto de clase | Qué lo evidencia el experimento |
 | --- | --- |
 | Lost update | Bajo RC: muchos commits “OK” pero el saldo casi no baja |
-| READ COMMITTED (default Postgres) | No detecta esa carrera de RMW en el cliente |
+| READ COMMITTED (default Postgres) | No logra detectar la condición de carrera de Read-Modify-Write (RMW) en el cliente |
 | SERIALIZABLE | Aparecen `SerializationFailure`; el saldo cuadra con los OK |
 | Reintentos / backoff | El cliente debe manejar aborts (no “se rompió la BD”) |
-| PACELC (puente) | Esto es **un nodo** en operación normal: tradeoff L vs C de *aislamiento*, no partición de red |
+| PACELC (puente) | Esto es **un nodo** en operación normal: tradeoff L vs C de *aislamiento*, a este momento no hemos explorado aun el particionamiento de red |
 
 ---
 
@@ -39,12 +36,12 @@ COMMIT
 
 Si 40 workers tuvieran efecto atómico cada uno, el saldo final sería **960**.
 
-- Si el saldo queda **cerca de 1000** con 40 OK → muchas restas se **pisaron** (lost update).  
-- Si el saldo es **1000 − (# OK)** → cada OK “contó”; los que chocaron fueron abortados.
+- Si el saldo queda **cerca de 1000** con 40 OK → muchas transacciones se **perdieron** (lost update).  
+- Si el saldo es **1000 − (# OK)** → cada OK logró modificar el balance; los que generaron condiciones de carrera fueron abortados.
 
 ---
 
-## 3. Qué datos recolectar (tabla obligatoria)
+## 3. Qué datos recolectar ( deben generar una tabla obligatoria)
 
 Corra **dos** experimentos con el mismo `WORKERS` (recomendado 40). Complete:
 
@@ -105,7 +102,6 @@ corresponde a una resta que “sobrevivió”; por eso \(S = 1000 - OK\).
 | RC con \(S \approx E\) | Poca concurrencia efectiva (baje sleep / suba workers) o corrida rara |
 | SER con \(S \neq E\) | Retries agotados (`otros errores` o SF altos y OK bajos) → suba `RETRIES` |
 | `connection refused` | No hizo `make up` / usó Python del host |
-| Corre contra Cockroach | Motor equivocado — este lab es **solo Postgres** |
 
 ---
 
@@ -137,14 +133,9 @@ with conn.transaction():
 
 ---
 
-## 6. Procedimiento (pasos)
+## 6. Procedimiento 
 
-### 6.1 Teoría ya vista
-
-Antes de tocar Docker: en clase deben haber visto lost update y niveles de aislamiento.
-Si no, **paren** y revisen slides de concurrencia S2 (o S1).
-
-### 6.2 Entorno
+### 6.1 Entorno
 
 ```bash
 make up && make build
@@ -152,7 +143,7 @@ docker compose exec -T postgres pg_isready -U ti4601 -d ti4601
 docker compose run --rm app python3 transactions/answer.py   # smoke John/Jane
 ```
 
-### 6.3 Experimentos
+### 6.2 Experimentos
 
 ```bash
 make lab-concurrency ISOLATION=READ_COMMITTED    # → evidence/rc.txt
@@ -166,27 +157,20 @@ docker compose run --rm app python3 labs/lab0-concurrency/stress.py \
   --isolation READ_COMMITTED --workers 40 --retries 8
 ```
 
-### 6.4 Informe (entregable)
+### 6.3 Informe
 
-1. Tabla de la §3 completa.  
-2. Párrafo RC: por qué \(S \gg E\) (o por qué no, si no salió).  
-3. Párrafo SER: rol de \(SF\) y por qué \(S \approx E\).  
-4. Párrafo código: explique el RMW + isolation + retry (§5).  
-5. Una frase PACELC: esto **no** es partición de red; es C vs L de aislamiento en un nodo.
+1. Tabla de la sección 3 completa.  
+2. Debe discutir las condiciones de carrera encontradas: por qué \(S \gg E\) (o por qué no, si no salió).  
+3. Debe discutir la serialización aplicada y su efecto: rol de \(SF\) y por qué \(S \approx E\).  
+4. Debe explicar el código: explique el RMW + isolation + retry.  
 
 ---
 
 ## 7. Rúbrica
 
-| Criterio | 100 | 50 | 0 |
-| --- | --- | --- | --- |
-| Datos §3 | Ambos aislamientos + \(S\) vs \(E\) | Incompleto | Sin números |
-| Interpretación | Usa lost update / abort con sus cifras | Solo “salió raro” | Ausente |
-| Código | Explica RMW + retry | Menciona archivos | No |
-| Evidencia cruda | `evidence/*.txt` | Parcial | No |
+| Criterio | Puntaje |
+| --- | --- |
+| Datos sección 3 | Ambos aislamientos + \(S\) vs \(E\) | 30 pts |
+| Informe | 35pts | |
+| Evidencia en txt | 15pts |
 
-## Errores comunes
-
-- Tratar este directorio como “Lab 1”.  
-- Usar `lab1-up` / Cockroach.  
-- Reportar solo promedios sin \(S\) vs \(E\).
