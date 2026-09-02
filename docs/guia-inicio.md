@@ -11,17 +11,17 @@ docker compose run --rm app python3 transactions/answer.py
 ```
 
 3. Teoría de aislamiento en clase (prerreq Lab 0).  
-4. Lab 0 se ejecuta en **S3**: `labs/lab0-concurrency/README.md`.
+4. Lab 0 se ejecuta en **S3** y **cuenta** (2,5 %): `labs/lab0-concurrency/README.md`.
 
 ## Después
 
 | Semana | Qué |
 | --- | --- |
-| S3 | Lab 0 + kickoff P1 |
-| S4 | Shard key P1 + prep métricas Lab 2 |
+| S3 | Lab 0 calificado (2,5 %) |
+| S4 | Kickoff P1 + shard key + prep métricas Lab 2 |
 | S5 | Lab 1: `labs/lab1-cluster/` |
 | S7 | Lab 2: `labs/lab2-queries/` |
 
-Índice: `labs/README.md` · Makefile: `labs/lab1-cluster/README-makefile.md`.
+Índice: `labs/README.md` · Guía ejecutable: `labs/lab1-cluster/README.md`.
 
 Reset Postgres: `make down-v && make up`.

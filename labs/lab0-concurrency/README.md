@@ -1,6 +1,7 @@
 # Lab 0 — Concurrencia: Lost Update vs SERIALIZABLE
 
-**Semana práctica:** 3 · **No es el Laboratorio 1** (eso es [`../lab1-cluster/`](../lab1-cluster/), S5).  
+**Semana práctica:** 3 · **Laboratorio 0 calificado (2,5 %).** No sustituye al
+Laboratorio 1 ([`../lab1-cluster/`](../lab1-cluster/), S5).  
 **Motor:** Postgres (`make up`).  
 **Teoría previa (obligatoria en clase, Bloque 3 de S2):** niveles de aislamiento,
 anomalías (lost update), MVCC a alto nivel, y que la C de ACID ≠ C de CAP/PACELC.
@@ -173,6 +174,8 @@ docker compose run --rm app python3 labs/lab0-concurrency/stress.py \
 3. Párrafo SER: rol de \(SF\) y por qué \(S \approx E\).  
 4. Párrafo código: explique el RMW + isolation + retry (§5).  
 5. Una frase PACELC: esto **no** es partición de red; es C vs L de aislamiento en un nodo.
+
+Nota: **2,5 %** del curso. Entrega al cierre de S3 (TEC Digital + `evidence/`).
 
 ---
 

@@ -51,11 +51,11 @@ services:
     profiles: ["client"]
 
   crdb-1:
-    image: cockroachdb/cockroach:v24.2.4
+    image: cockroachdb/cockroach:v24.3.0
     profiles: ["lab1"]
     container_name: ti4601-crdb-1
     hostname: crdb-1
-    command: start --insecure --advertise-addr=crdb-1 --join=crdb-1,crdb-2,crdb-3 --cache=256MiB --max-sql-memory=256MiB
+    command: start --insecure --advertise-addr=crdb-1 --join=crdb-1,crdb-2,crdb-3 --locality=region=cr-sj,zone=a --cache=256MiB --max-sql-memory=256MiB
     volumes:
       - crdb1:/cockroach/cockroach-data
     ports:
@@ -65,29 +65,29 @@ services:
       - curso
 
   crdb-2:
-    image: cockroachdb/cockroach:v24.2.4
+    image: cockroachdb/cockroach:v24.3.0
     profiles: ["lab1"]
     container_name: ti4601-crdb-2
     hostname: crdb-2
-    command: start --insecure --advertise-addr=crdb-2 --join=crdb-1,crdb-2,crdb-3 --cache=256MiB --max-sql-memory=256MiB
+    command: start --insecure --advertise-addr=crdb-2 --join=crdb-1,crdb-2,crdb-3 --locality=region=cr-limon,zone=a --cache=256MiB --max-sql-memory=256MiB
     volumes:
       - crdb2:/cockroach/cockroach-data
     networks:
       - curso
 
   crdb-3:
-    image: cockroachdb/cockroach:v24.2.4
+    image: cockroachdb/cockroach:v24.3.0
     profiles: ["lab1"]
     container_name: ti4601-crdb-3
     hostname: crdb-3
-    command: start --insecure --advertise-addr=crdb-3 --join=crdb-1,crdb-2,crdb-3 --cache=256MiB --max-sql-memory=256MiB
+    command: start --insecure --advertise-addr=crdb-3 --join=crdb-1,crdb-2,crdb-3 --locality=region=us-east,zone=a --cache=256MiB --max-sql-memory=256MiB
     volumes:
       - crdb3:/cockroach/cockroach-data
     networks:
       - curso
 
   crdb-init:
-    image: cockroachdb/cockroach:v24.2.4
+    image: cockroachdb/cockroach:v24.3.0
     profiles: ["lab1"]
     container_name: ti4601-crdb-init
     depends_on:
@@ -120,13 +120,17 @@ services:
     profiles: ["lab1"]
     working_dir: /src
     environment:
-      PGHOST: crdb-1
+      # Lista de hosts: cada operación abre una conexión nueva y puede continuar
+      # aunque crdb-1 esté caído durante el escenario de failover.
+      PGHOST: crdb-1,crdb-2,crdb-3
       PGPORT: "26257"
       PGUSER: root
       PGPASSWORD: ""
       PGDATABASE: ti4601
       PGSSLMODE: disable
       TI4601_ENGINE: cockroach
+      # Compose interpola el .env de la raíz; nunca se versiona.
+      COCKROACH_LICENSE: ${COCKROACH_LICENSE:-}
     volumes:
       - .:/src
     depends_on:

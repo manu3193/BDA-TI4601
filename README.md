@@ -67,9 +67,12 @@ usa libpq (`psycopg.connect()` sin hardcodear IPs).
 
 | # | Carpeta | Semana |
 | --- | --- | --- |
-| 0 | [`lab0-concurrency/`](labs/lab0-concurrency/) | S3 · Postgres · lost update (teoría S2) |
-| 1 | [`lab1-cluster/`](labs/lab1-cluster/) | S5 · Cockroach · quórum / P1 |
-| 2 | [`lab2-queries/`](labs/lab2-queries/) | S7 · mismo clúster · semi-join / bytes |
+| 0 | [`lab0-concurrency/`](labs/lab0-concurrency/) | S3 · Postgres · lost update (teoría S2) · **2,5 %** |
+| 1 | [`lab1-cluster/`](labs/lab1-cluster/) | S5 · Cockroach · quórum / P1 · **2,5 %** |
+| 2 | [`lab2-queries/`](labs/lab2-queries/) | S7 · mismo clúster · semi-join / bytes · **2,5 %** |
+| 3 | se publica S10 | S10 · fallas / partición de red · **2,5 %** |
+| 4 | se publica S13 | S13 · lakehouse · **2,5 %** |
+| 5 | se publica S15 | S15 · vectores + integración · **2,5 %** |
 
 ```bash
 make lab-concurrency ISOLATION=READ_COMMITTED
@@ -82,7 +85,7 @@ make lab-concurrency ISOLATION=SERIALIZABLE
 
 | Variable | Postgres (`app`) | Cockroach (`app-crdb`) |
 | --- | --- | --- |
-| `PGHOST` | `postgres` | `crdb-1` |
+| `PGHOST` | `postgres` | `crdb-1,crdb-2,crdb-3` |
 | `PGPORT` | `5432` | `26257` |
 | `PGUSER` | `ti4601` | `root` |
 | `PGPASSWORD` | `ti4601` | *(vacío, inseguro)* |
@@ -90,6 +93,11 @@ make lab-concurrency ISOLATION=SERIALIZABLE
 | `PGSSLMODE` | — | `disable` |
 
 Host opcional: `psql` → `127.0.0.1:5433`. UI de CRDB → `http://127.0.0.1:8080`.
+
+Lab 1 usa multi-region SQL (`REGIONAL BY ROW` / `GLOBAL`). Un clúster nuevo `v24.3.0`
+tiene siete días de gracia; para conservarlo durante todo el P1 copie `.env.example` a
+`.env` en la raíz y use allí el valor `COCKROACH_LICENSE` provisto por el docente.
+El archivo está ignorado por git.
 
 ## Persistencia
 

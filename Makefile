@@ -2,7 +2,7 @@
 # Interfaz operativa genérica (Compose). Smoke tests = documentados en README, no targets.
 
 .PHONY: help up down down-v build shell test-tx lab-concurrency \
-	lab1-up lab1-down lab1-down-v lab1-shell reset-pg
+	lab1-up lab1-down lab1-down-v lab1-shell lab1-status lab1-check reset-pg
 
 COMPOSE := docker compose
 ISOLATION ?= READ_COMMITTED
@@ -14,7 +14,9 @@ help:
 	@echo "  make up | down | down-v | build | shell | reset-pg"
 	@echo "  make test-tx"
 	@echo "  make lab-concurrency ISOLATION=READ_COMMITTED|SERIALIZABLE"
-	@echo "  Lab 1: make lab1-up | lab1-shell | lab1-down | lab1-down-v"
+	@echo "  Lab 1: make lab1-up | lab1-status | lab1-shell | lab1-check"
+	@echo "         make lab1-down | lab1-down-v"
+	@echo "  Configuración, medición y chaos: seguir labs/lab1-cluster/README.md"
 	@echo ""
 	@echo "Smoke test (manual): ver README.md § Verificar el entorno"
 	@echo "Docs: labs/README.md · labs/lab0-concurrency/ · labs/lab1-cluster/"
@@ -48,7 +50,7 @@ lab-concurrency: up
 	$(COMPOSE) run --rm -e ISOLATION=$(ISOLATION) -e WORKERS=$(WORKERS) -e RETRIES=$(RETRIES) \
 		app python3 labs/lab0-concurrency/stress.py --isolation $(ISOLATION) --workers $(WORKERS) --retries $(RETRIES)
 
-lab1-up:
+lab1-up: build
 	$(COMPOSE) --profile lab1 up -d crdb-1 crdb-2 crdb-3
 	$(COMPOSE) --profile lab1 up crdb-init
 
@@ -60,3 +62,11 @@ lab1-down-v:
 
 lab1-shell:
 	$(COMPOSE) --profile lab1 run --rm app-crdb bash
+
+lab1-status:
+	$(COMPOSE) --profile lab1 ps
+	docker exec ti4601-crdb-1 cockroach node status --insecure
+
+lab1-check:
+	$(COMPOSE) --profile lab1 run --rm --no-deps app-crdb \
+		python3 labs/lab1-cluster/verify_cluster.py
