@@ -5,3 +5,4 @@
 .venv
 .env
 *.log
+labs/*/data/

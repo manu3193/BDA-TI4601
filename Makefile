@@ -2,7 +2,8 @@
 # Interfaz operativa genérica (Compose). Smoke tests = documentados en README, no targets.
 
 .PHONY: help up down down-v build shell test-tx lab-concurrency \
-	lab1-up lab1-down lab1-down-v lab1-shell lab1-status lab1-check reset-pg
+	lab1-up lab1-down lab1-down-v lab1-shell lab1-status lab1-check reset-pg \
+	lab2-up lab2-down
 
 COMPOSE := docker compose
 ISOLATION ?= READ_COMMITTED
@@ -17,9 +18,10 @@ help:
 	@echo "  Lab 1: make lab1-up | lab1-status | lab1-shell | lab1-check"
 	@echo "         make lab1-down | lab1-down-v"
 	@echo "  Configuración, medición y chaos: seguir labs/lab1-cluster/README.md"
+	@echo "  Lab 2 (S9): make lab2-up | lab2-down · labs/lab2-one-size/README.md"
 	@echo ""
 	@echo "Smoke test (manual): ver README.md § Verificar el entorno"
-	@echo "Docs: labs/README.md · labs/lab0-concurrency/ · labs/lab1-cluster/"
+	@echo "Docs: labs/README.md · labs/lab0-concurrency/ · labs/lab1-cluster/ · labs/lab2-one-size/"
 
 up:
 	$(COMPOSE) up -d postgres
@@ -49,6 +51,12 @@ test-tx: up
 lab-concurrency: up
 	$(COMPOSE) run --rm -e ISOLATION=$(ISOLATION) -e WORKERS=$(WORKERS) -e RETRIES=$(RETRIES) \
 		app python3 labs/lab0-concurrency/stress.py --isolation $(ISOLATION) --workers $(WORKERS) --retries $(RETRIES)
+
+lab2-up: up
+	$(COMPOSE) --profile lab2 up -d valkey
+
+lab2-down:
+	$(COMPOSE) --profile lab2 stop valkey
 
 lab1-up: build
 	$(COMPOSE) --profile lab1 up -d crdb-1 crdb-2 crdb-3

@@ -9,3 +9,4 @@ tmp/
 .venv/
 venv/
 .vscode/
+labs/*/data/

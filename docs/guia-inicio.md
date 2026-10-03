@@ -18,9 +18,9 @@ docker compose run --rm app python3 transactions/answer.py
 | Semana | Qué |
 | --- | --- |
 | S3 | Lab 0 calificado (2,5 %) |
-| S4 | Kickoff P1 + shard key + prep métricas Lab 2 |
+| S4 | Kickoff P1 + shard key |
 | S5 | Lab 1: `labs/lab1-cluster/` |
-| S7 | Lab 2: `labs/lab2-queries/` |
+| S9 | Lab 2: `labs/lab2-one-size/` (Postgres + Valkey; `make lab2-up`) |
 
 Índice: `labs/README.md` · Guía ejecutable: `labs/lab1-cluster/README.md`.
 

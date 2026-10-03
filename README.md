@@ -58,6 +58,7 @@ usa libpq (`psycopg.connect()` sin hardcodear IPs).
 | Shell con PG* | `make shell` |
 | Lab 0 concurrencia | `make lab-concurrency` · `labs/lab0-concurrency/` |
 | Lab 1 clúster (S5+) | `labs/lab1-cluster/` |
+| Lab 2 one size (S9) | `make lab2-up` · `labs/lab2-one-size/` |
 
 Índice: [`labs/README.md`](labs/README.md).
 
@@ -69,7 +70,7 @@ usa libpq (`psycopg.connect()` sin hardcodear IPs).
 | --- | --- | --- |
 | 0 | [`lab0-concurrency/`](labs/lab0-concurrency/) | S3 · Postgres · lost update (teoría S2) · **2,5 %** |
 | 1 | [`lab1-cluster/`](labs/lab1-cluster/) | S5 · Cockroach · quórum / P1 · **2,5 %** |
-| 2 | [`lab2-queries/`](labs/lab2-queries/) | S7 · mismo clúster · semi-join / bytes · **2,5 %** |
+| 2 | [`lab2-one-size/`](labs/lab2-one-size/) | S9 · Postgres + Valkey · one size fits all · **2,5 %** |
 | 3 | se publica S10 | S10 · fallas / partición de red · **2,5 %** |
 | 4 | se publica S13 | S13 · lakehouse · **2,5 %** |
 | 5 | se publica S15 | S15 · vectores + integración · **2,5 %** |

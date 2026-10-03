@@ -733,7 +733,7 @@ después de restaurar. Si la sonda termina antes de recuperar, conserve el error
 verifique `make lab1-status` y ejecute aparte su `UPDATE ... RETURNING`.
 
 Esto no es una partición de red: los procesos están detenidos. `tc`/Toxiproxy
-corresponde al Laboratorio 3.
+corresponde a la unidad 5 (partición de red).
 
 ---
 

@@ -3,6 +3,7 @@
 # Perfiles:
 #   (ninguno)  postgres          → Semanas 2–4 + lab concurrencia
 #   lab1       cockroachdb ×3    → Lab 1 (S5) y P1 (S5–S8)
+#   lab2       valkey (clave-valor) → Laboratorio 2 (S9)
 #
 # Cliente Python: siempre vía `docker compose run --rm app …`
 # (Compose habilita el perfil del servicio target automáticamente).
@@ -30,6 +31,21 @@ services:
     networks:
       - curso
 
+  valkey:
+    image: valkey/valkey:8.1
+    profiles: ["lab2"]
+    container_name: ti4601-valkey
+    command: >
+      valkey-server --save "" --appendonly no
+      --maxmemory 4gb --maxmemory-policy noeviction
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    networks:
+      - curso
+
   app:
     build: .
     image: ti4601:local
@@ -41,6 +57,7 @@ services:
       PGPASSWORD: ti4601
       PGDATABASE: ti4601
       TI4601_ENGINE: postgres
+      VALKEY_HOST: valkey
     volumes:
       - .:/src
     depends_on:
