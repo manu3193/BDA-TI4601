@@ -6,14 +6,14 @@ semana (o la semana anterior, si el plan lo indica).
 
 Los **seis** labs (0 a 5) son calificados: **2,5 %** cada uno (15 % del curso).
 
-| Carpeta | Plan | Semana práctica | Motor | Teoría antes del lab |
+| Carpeta | Plan | Semana práctica | Motor |
 | --- | --- | --- | --- | --- |
-| [`lab0-concurrency/`](lab0-concurrency/) | **Laboratorio 0** (2,5 %) | **S3** | Postgres | Aislamiento / lost update (**S2** B3) |
-| [`lab1-cluster/`](lab1-cluster/) | **Laboratorio 1** (2,5 %) | **S5** | Cockroach ×3 | Raft oral + mapa 04-II → CRDB (`REGIONAL BY ROW`) |
-| [`lab2-one-size/`](lab2-one-size/) | **Laboratorio 2** (2,5 %) | **S9** | Postgres 16 + Valkey 8 | Stonebraker y Çetintemel (2005) + deck NoSQL (S9, mismo día) |
+| [`lab0-concurrency/`](lab0-concurrency/) | **Laboratorio 0** (2,5 %) | **S3** | Postgres |
+| [`lab1-cluster/`](lab1-cluster/) | **Laboratorio 1** (2,5 %) | **S5** | Cockroach ×3 |
+| [`lab2-one-size/`](lab2-one-size/) | **Laboratorio 2** (2,5 %) | **S9** | Postgres 16 + Valkey 8 |
 | *(se publica S10)* | **Laboratorio 3** (2,5 %) | **S10** | — | Partición de red (unidad 5) |
-| *(se publica S13)* | **Laboratorio 4** (2,5 %) | **S13** | DuckDB + Iceberg + MinIO | Temporal (S12); adelanta U8 (S14) |
-| *(se publica S15)* | **Laboratorio 5** (2,5 %) | **S15** | pgvector + federación/CDC | HNSW (S13) + NoSQL (S15) |
+| *(se publica S13)* | **Laboratorio 4** (2,5 %) | **S13** | DuckDB + Iceberg + MinIO |
+| *(se publica S15)* | **Laboratorio 5** (2,5 %) | **S15** | pgvector + federación/CDC |
 
 Si alguna carpeta aún no está publicada, el enunciado aparece esa semana en TEC Digital /
 esta misma ruta.
