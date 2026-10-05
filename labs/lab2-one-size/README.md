@@ -4,7 +4,7 @@
 
 **Valor:** 2,5 % 
 
-**Entrega:** martes 13 de octubre de 2026, 11:00 pm, PDF en TEC Digital (un PDF por grupo) .  
+**Entrega:** domingo 18 de octubre de 2026, 11:00 pm, PDF en TEC Digital (un PDF por grupo) .  
 **Motores:** Postgres 16 (relacional) y Valkey 8 (clave-valor, fork abierto de Redis).  
 **Datos:** [NYC Yellow Taxi Trip Data](https://www.kaggle.com/datasets/elemento/nyc-yellow-taxi-trip-data) en Kaggle, archivo `yellow_tripdata_2016-01.csv` (10 906 858 viajes, 1,7 GB).  
 
