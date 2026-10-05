@@ -7,7 +7,7 @@ semana (o la semana anterior, si el plan lo indica).
 Los **seis** labs (0 a 5) son calificados: **2,5 %** cada uno (15 % del curso).
 
 | Carpeta | Plan | Semana práctica | Motor |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | 
 | [`lab0-concurrency/`](lab0-concurrency/) | **Laboratorio 0** (2,5 %) | **S3** | Postgres |
 | [`lab1-cluster/`](lab1-cluster/) | **Laboratorio 1** (2,5 %) | **S5** | Cockroach ×3 |
 | [`lab2-one-size/`](lab2-one-size/) | **Laboratorio 2** (2,5 %) | **S9** | Postgres 16 + Valkey 8 |
