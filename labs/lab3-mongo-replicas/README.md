@@ -851,29 +851,7 @@ Distribución sugerida: páginas 1–2, configuración y replicación (pasos 1�
 
 
 
-## 13. Contrato para el Proyecto 2
-
-El laboratorio enseña un procedimiento; no entrega la implementación del proyecto.
-
-**Puede reutilizar:**
-
-- la idea de tres `mongod` con `--replSet` y la URI con los tres nodos;
-- los comandos `rs.status()`, `rs.conf()`, `explain()` y la lectura del oplog;
-- las definiciones de p50, p95, p99, RTO y RPO;
-- la estructura general: precondición → evento → medición → verificación.
-
-**Debe producir desde cero:**
-
-- su propio conjunto de réplicas, con su propio nombre y su propio Compose;
-- los documentos, índices y operaciones de su dominio (tomar una tarea no es vender una entrada);
-- el buffer de escrituras pendientes y su vaciado idempotente;
-- su simulador, su automatización de fallas y su evidencia.
-
----
-
-
-
-## 14. Recuperación y errores comunes
+## 13. Recuperación y errores comunes
 
 
 | Síntoma                                                    | Acción                                                                                    |
