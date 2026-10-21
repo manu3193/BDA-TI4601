@@ -11,6 +11,8 @@ Toda la evidencia va en `evidence/tarea3/` y cada cifra del PDF debe salir de un
 
 ---
 
+
+
 ## 1. Preparar el entorno (una sola vez)
 
 Todo se ejecuta en contenedores, desde la raíz del repositorio.
@@ -28,7 +30,7 @@ docker exec -i ti4601-tarea3 mongoimport --db boleteria --collection eventos --d
   < labs/lab3-mongo-replicas/data/eventos.jsonl
 ```
 
-**Resultado esperado:** el generador imprime un manifiesto con `eventos: 400` y `mongoimport` termina con `400 document(s) imported successfully`. Para abrir `mongosh`:
+**Resultado esperado:** el generador imprime un manifiesto con `eventos: 400` y `mongoimport` termina con `400 document(s) imported successfully`. `data/eventos.jsonl` no viene en el repositorio: lo escribe `generar_datos.py`, y `labs/*/data/` no se versiona. Para abrir `mongosh`:
 
 ```bash
 docker exec -it ti4601-tarea3 mongosh boleteria
@@ -48,9 +50,11 @@ El campo `patrocinador` solo existe en algunos eventos. Al terminar la tarea pue
 
 ---
 
+
+
 ## 2. Parte A — Consultas (70 puntos)
 
-Escriba **un archivo** `labs/lab3-mongo-replicas/tarea/consultas.js` que se ejecute completo con:
+Complete [`tarea/consultas.js`](tarea/consultas.js). El archivo ya está en el repositorio, con el encabezado de cada consulta y sin las respuestas. Debe ejecutarse completo con:
 
 ```bash
 mkdir -p evidence/tarea3
@@ -66,13 +70,15 @@ El archivo se ejecuta como *script*, no como sesión interactiva, por lo que hay
 
 Proyecte **solo** los campos que pide la pregunta.
 
-| # | Pregunta | Operadores |
-| --- | --- | --- |
-| A1 | Nombre, recinto y fecha de los conciertos de Heredia entre el 1 de diciembre de 2026 y el 28 de febrero de 2027, ordenados por fecha | `find`, rango sobre `fecha`, `sort`, proyección |
-| A2 | Eventos que tienen una zona VIP con precio menor a 48 000 colones; muestre el nombre del evento y **solo** su zona VIP | `$elemMatch` en el filtro y en la proyección |
-| A3 | Eventos con la etiqueta `"accesible"` que no sean de categoría `"teatro"` ni `"conferencia"` | consulta sobre un arreglo, `$nin` |
-| A4 | Cantidad de eventos **sin** patrocinador, por categoría | `$exists`, `aggregate` con `$group` |
-| A5 | Capacidad total por ciudad (suma de las capacidades de todas las zonas de todos sus eventos), de mayor a menor | `$unwind`, `$group`, `$sort` |
+
+| #   | Pregunta                                                                                                                             | Operadores                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| A1  | Nombre, recinto y fecha de los conciertos de Heredia entre el 1 de diciembre de 2026 y el 28 de febrero de 2027, ordenados por fecha | `find`, rango sobre `fecha`, `sort`, proyección |
+| A2  | Eventos que tienen una zona VIP con precio menor a 48 000 colones; muestre el nombre del evento y **solo** su zona VIP               | `$elemMatch` en el filtro y en la proyección    |
+| A3  | Eventos con la etiqueta `"accesible"` que no sean de categoría `"teatro"` ni `"conferencia"`                                         | consulta sobre un arreglo, `$nin`               |
+| A4  | Cantidad de eventos **sin** patrocinador, por categoría                                                                              | `$exists`, `aggregate` con `$group`             |
+| A5  | Capacidad total por ciudad (suma de las capacidades de todas las zonas de todos sus eventos), de mayor a menor                       | `$unwind`, `$group`, `$sort`                    |
+
 
 **Índices (incluido en los 70 puntos).** Para **A1**, muestre `explain("executionStats")` antes y después de crear un índice compuesto que usted proponga, e incluya en el archivo el `createIndex`. Incluya en el PDF `totalDocsExamined`, `totalKeysExamined`, `nReturned` y la etapa (`COLLSCAN` o `IXSCAN`). Justifique el orden de los campos del índice.
 
@@ -80,7 +86,9 @@ Antes de escribir A2, pruebe en `mongosh` la versión **sin** `$elemMatch` (dos 
 
 ---
 
-## 3. Parte B — Embeber o referenciar (30 puntos)
+
+
+## 3. Parte B — Anidar o referenciar (30 puntos)
 
 En la boletería, las zonas viven **dentro** del documento del evento. Para registrar las compras, un compañero propone guardar también cada orden como un elemento de un arreglo `ordenes` dentro del evento. Otra opción es una colección aparte `ordenes` que referencia al evento por su `_id`.
 
@@ -92,18 +100,24 @@ Responda en **media página como máximo**, con números:
 
 ---
 
+
+
 ## 4. Entregable
 
 - **PDF de máximo 2 páginas** con las consultas, los resultados de `explain` antes y después del índice, la comparación de A2 y la Parte B.
 - **En el repositorio:** `labs/lab3-mongo-replicas/tarea/consultas.js` y `evidence/tarea3/consultas.txt`, con commits de los tres integrantes.
 
+
+
 ## 5. Rúbrica (100 puntos, se escala a 1,5 %)
 
-| Criterio | Pts | Cómo se obtiene el máximo |
-| --- | --- | --- |
-| Consultas A1–A5 | 45 | el archivo corre completo y cada resultado responde la pregunta con proyecciones mínimas (9 por consulta) |
-| Índice y `explain` de A1 | 15 | antes y después con las cuatro métricas; orden de campos justificado |
-| Comparación de A2 | 10 | cantidad de eventos con y sin `$elemMatch` y explicación correcta de la diferencia |
-| Embeber o referenciar | 30 | cálculo con `bsonsize()` (10), concurrencia sobre un documento (10), regla aplicada a otro dominio (10) |
+
+| Criterio                 | Pts | Cómo se obtiene el máximo                                                                                 |
+| ------------------------ | --- | --------------------------------------------------------------------------------------------------------- |
+| Consultas A1–A5          | 45  | el archivo corre completo y cada resultado responde la pregunta con proyecciones mínimas (9 por consulta) |
+| Índice y `explain` de A1 | 15  | antes y después con las cuatro métricas; orden de campos justificado                                      |
+| Comparación de A2        | 10  | cantidad de eventos con y sin `$elemMatch` y explicación correcta de la diferencia                        |
+| Embeber o referenciar    | 30  | cálculo con `bsonsize()` (10), concurrencia sobre un documento (10), regla aplicada a otro dominio (10)   |
+
 
 **Topes.** Cifras sin respaldo en `evidence/tarea3/`: no se puntúan. Un `consultas.js` que no corre completo: Consultas A1–A5 a la mitad.
