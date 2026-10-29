@@ -5,6 +5,7 @@
 #   lab1       cockroachdb ×3    → Lab 1 (S5) y P1 (S5–S8)
 #   lab2       valkey (clave-valor) → Laboratorio 2 (S9)
 #   lab3       mongodb ×3 (conjunto de réplicas) → Laboratorio 3 (S10) y base del P2
+#   lab4       neo4j ×1 + notebook             → Laboratorio 4 (S13), actas municipales
 #
 # Cliente Python: siempre vía `docker compose run --rm app …`
 # (Compose habilita el perfil del servicio target automáticamente).
@@ -234,6 +235,68 @@ services:
     networks:
       - curso
 
+  # ---------------------------------------------------------------------------
+  # Laboratorio 4 — Neo4j Community, un nodo, y el notebook del laboratorio.
+  # No es un conjunto de réplicas: el Laboratorio 3 ya midió mayoría y elección.
+  # ---------------------------------------------------------------------------
+  neo4j:
+    image: neo4j:5.26-community
+    profiles: ["lab4"]
+    container_name: ti4601-neo4j
+    hostname: neo4j
+    environment:
+      NEO4J_AUTH: neo4j/ti4601-grafos
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    volumes:
+      - neo4j4:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    networks:
+      - curso
+
+  lab4-notebook:
+    build:
+      context: ./labs/lab4-neo4j
+      dockerfile: Dockerfile
+    image: ti4601-lab4:local
+    profiles: ["lab4"]
+    container_name: ti4601-lab4
+    working_dir: /src
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: ti4601-grafos
+      MODELO_ID: Qwen/Qwen2.5-0.5B-Instruct
+      EMBED_MODEL: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      HF_HOME: /models/hf
+      HUGGINGFACE_HUB_CACHE: /models/hf
+      JUPYTER_TOKEN: ti4601
+    command:
+      - start-notebook.py
+      - --ServerApp.root_dir=/src
+      - --ServerApp.token=ti4601
+      - --ServerApp.password=
+      - --ServerApp.ip=0.0.0.0
+      - --ServerApp.port=8888
+    ports:
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - .:/src
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - curso
+
 volumes:
   pgdata:
   crdb1:
@@ -242,6 +305,7 @@ volumes:
   mongo1:
   mongo2:
   mongo3:
+  neo4j4:
 
 networks:
   curso:

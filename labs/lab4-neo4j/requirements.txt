@@ -1,0 +1,9 @@
+neo4j>=5.26,<6
+llama-index-core>=0.14,<0.15
+llama-index-embeddings-huggingface>=0.6,<0.9
+sentence-transformers>=3.3
+langgraph>=0.2.60,<2
+pypdf>=5.1,<7
+requests>=2.32,<3
+transformers>=4.46
+nbconvert>=7.16,<8
