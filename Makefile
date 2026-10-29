@@ -4,7 +4,8 @@
 .PHONY: help up down down-v build shell test-tx lab-concurrency \
 	lab1-up lab1-down lab1-down-v lab1-shell lab1-status lab1-check reset-pg \
 	lab2-up lab2-down \
-	lab3-up lab3-down lab3-down-v lab3-status lab3-shell lab3-app lab3-check
+	lab3-up lab3-down lab3-down-v lab3-status lab3-shell lab3-app lab3-check \
+	lab4-up lab4-down lab4-down-v lab4-ejecutar
 
 COMPOSE := docker compose
 NODE ?= mongo-1
@@ -23,6 +24,8 @@ help:
 	@echo "  Lab 2 (S9): make lab2-up | lab2-down · labs/lab2-one-size/README.md"
 	@echo "  Lab 3 (S10): make lab3-up | lab3-status [NODE=mongo-2] | lab3-shell [NODE=mongo-2] | lab3-app | lab3-check"
 	@echo "               make lab3-down | lab3-down-v · labs/lab3-mongo-replicas/README.md"
+	@echo "  Lab 4 (S13): make lab4-up | lab4-ejecutar | lab4-down | lab4-down-v"
+	@echo "               notebook http://127.0.0.1:8888/lab?token=ti4601 · labs/lab4-neo4j/README.md"
 	@echo ""
 	@echo "Smoke test (manual): ver README.md § Verificar el entorno"
 	@echo "Docs: labs/README.md · labs/lab0-concurrency/ · labs/lab1-cluster/ · labs/lab2-one-size/ · labs/lab3-mongo-replicas/"
@@ -107,3 +110,21 @@ lab3-down:
 
 lab3-down-v:
 	$(COMPOSE) --profile lab3 down -v
+
+# --- Laboratorio 4: Neo4j de un nodo + notebook (actas municipales) ---
+
+lab4-up:
+	$(COMPOSE) --profile lab4 up -d --build neo4j lab4-notebook
+
+lab4-ejecutar:
+	$(COMPOSE) --profile lab4 exec -T lab4-notebook \
+		jupyter nbconvert --execute --to notebook \
+		--ExecutePreprocessor.timeout=900 \
+		--output Lab4.ejecutado --output-dir /tmp \
+		labs/lab4-neo4j/Lab4.ipynb
+
+lab4-down:
+	$(COMPOSE) --profile lab4 down
+
+lab4-down-v:
+	$(COMPOSE) --profile lab4 down -v

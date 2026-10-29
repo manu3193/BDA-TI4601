@@ -12,7 +12,7 @@ Los **seis** labs (0 a 5) son calificados: **2,5 %** cada uno (15 % del curso).
 | [`lab1-cluster/`](lab1-cluster/) | **Laboratorio 1** (2,5 %) | **S5** | Cockroach ×3 |
 | [`lab2-one-size/`](lab2-one-size/) | **Laboratorio 2** (2,5 %) | **S9** | Postgres 16 + Valkey 8 |
 | [`lab3-mongo-replicas/`](lab3-mongo-replicas/) | **Laboratorio 3** (2,5 %) + Tarea 3 (1,5 %) | **S10** | MongoDB ×3 (conjunto de réplicas) |
-| *(se publica S13)* | **Laboratorio 4** (2,5 %) | **S13** | DuckDB + Iceberg + MinIO |
+| [`lab4-neo4j/`](lab4-neo4j/) | **Laboratorio 4** (2,5 %) | **S13** | Neo4j Community (un nodo) + notebook |
 | *(se publica S15)* | **Laboratorio 5** (2,5 %) | **S15** | pgvector + federación/CDC |
 
 Si alguna carpeta aún no está publicada, el enunciado aparece esa semana en TEC Digital /
@@ -30,7 +30,7 @@ S7  procesamiento de consultas (Bernstein / semi-join)
 S8  Parcial I + defensa P1
 S9  Lab 2 (una talla para todos: relacional frente a clave-valor)
 S10 Lab 3 (réplicas MongoDB) + asignación P2
-S13 Lab 4 + hito P2 stack A
+S13 Lab 4 (actas municipales en Neo4j) + hito P2 stack A
 S15 Lab 5 + hito P2 stack B
 S16 Parcial II + defensa P2
 ```
@@ -44,6 +44,9 @@ docker compose run --rm app python3 labs/lab0-concurrency/stress.py …
 # MongoDB (lab3):
 make lab3-up            # luego rs.initiate() a mano: labs/lab3-mongo-replicas/README.md
 make lab3-check
+
+# Neo4j + notebook (lab4):
+make lab4-up
 
 # Cockroach (lab1):
 make lab1-up

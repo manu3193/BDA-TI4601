@@ -60,6 +60,7 @@ usa libpq (`psycopg.connect()` sin hardcodear IPs).
 | Lab 1 clúster (S5+) | `labs/lab1-cluster/` |
 | Lab 2 one size (S9) | `make lab2-up` · `labs/lab2-one-size/` |
 | Lab 3 réplicas MongoDB (S10) | `make lab3-up` · `labs/lab3-mongo-replicas/` |
+| Lab 4 actas en Neo4j (S13) | `make lab4-up` · `labs/lab4-neo4j/` |
 
 Índice: [`labs/README.md`](labs/README.md).
 
@@ -73,7 +74,7 @@ usa libpq (`psycopg.connect()` sin hardcodear IPs).
 | 1 | [`lab1-cluster/`](labs/lab1-cluster/) | S5 · Cockroach · quórum / P1 · **2,5 %** |
 | 2 | [`lab2-one-size/`](labs/lab2-one-size/) | S9 · Postgres + Valkey · one size fits all · **2,5 %** |
 | 3 | [`lab3-mongo-replicas/`](labs/lab3-mongo-replicas/) | S10 · MongoDB · réplicas, mayoría, elección · **2,5 %** (+ Tarea 3, 1,5 %) |
-| 4 | se publica S13 | S13 · lakehouse · **2,5 %** |
+| 4 | [`lab4-neo4j/`](labs/lab4-neo4j/) | S13 · Neo4j · actas municipales · **2,5 %** |
 | 5 | se publica S15 | S15 · vectores + integración · **2,5 %** |
 
 ```bash
@@ -96,6 +97,8 @@ make lab-concurrency ISOLATION=SERIALIZABLE
 
 Lab 3 (`app-mongo`) usa `MONGO_URI=mongodb://mongo-1:27017,mongo-2:27017,mongo-3:27017/?replicaSet=rs-lab3`
 y `MONGO_DB=boleteria`. Los miembros de MongoDB no publican puertos al host.
+
+Lab 4 publica Neo4j en `127.0.0.1:7474` y `127.0.0.1:7687` (`neo4j` / `ti4601-grafos`) y el notebook en `http://127.0.0.1:8888/lab?token=ti4601`. El modelo preentrenado va dentro de la imagen; no hay clave de API.
 
 Host opcional: `psql` → `127.0.0.1:5433`. UI de CRDB → `http://127.0.0.1:8080`.
 
