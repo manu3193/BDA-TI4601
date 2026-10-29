@@ -10,13 +10,11 @@
 
 El laboratorio continúa la clase de bases de datos de grafos (`08-BDGrafos`). Allí vimos el grafo de propiedades, los nodos con etiquetas, las relaciones con tipo y dirección, y los patrones `MATCH ... RETURN` de Cypher. Aquí se usan esas ideas para cargar actas reales en Neo4j y para responder preguntas con un modelo de lenguaje que se apoya en el grafo.
 
-El grafo es de un solo nodo a propósito. Mayoría, elecciones y réplicas ya se midieron en el Laboratorio 3.
-
 ---
 
-## 1. Qué queda dentro y qué queda fuera
+## 1. Datos de Actas municipales
 
-El índice lista actas desde 1992. Bajarlo entero no cabe en la sesión, y muchos archivos viejos no sirven para este ejercicio: algunos enlaces devuelven HTML y otros son PDF escaneados sin texto.
+El índice lista actas desde 1992. Bajarlo entero no alcanza para este laboratorio.
 
 El notebook **lee el índice completo**, pero **carga solo cuatro actas de 2026** con texto digital y, de cada una, **solo las dos primeras páginas**:
 
@@ -24,11 +22,10 @@ El notebook **lee el índice completo**, pero **carga solo cuatro actas de 2026*
 | --- | --- |
 | `58-2026`, `59-2026`, `60-2026`, `61-2026` | corpus del grafo |
 
-Con eso alcanza para construir el grafo, recorrer caminos de uno y dos saltos y hacerle preguntas al modelo con un contexto que sí está en el grafo.
 
-No se necesita ninguna clave de API. El modelo de *embeddings* (`paraphrase-multilingual-MiniLM-L12-v2`) y el modelo que redacta (`Qwen2.5-0.5B-Instruct`) vienen dentro de la imagen de Docker. Son modelos **preentrenados**: el curso los usa, no los entrena.
+No se necesita ninguna clave de API. El modelo de *embeddings* (`paraphrase-multilingual-MiniLM-L12-v2`) y el modelo que redacta (`Qwen2.5-0.5B-Instruct`) vienen dentro de la imagen de Docker. Son modelos **preentrenados**.
 
-## 2. Qué aprenderá
+## 2. Qué aprenderemos
 
 1. Modelar un dominio como grafo de propiedades: actas, fragmentos de texto y personas como nodos, y `CONTIENE`, `SIGUE` y `PARTICIPA_EN` como relaciones con propiedades.
 2. Cargar datos en Neo4j de forma **idempotente** con `MERGE`, parámetros y restricciones de unicidad.
@@ -91,13 +88,12 @@ El paso 6.3 pide una **captura del navegador de Neo4j** con el grafo cargado; va
 
 Pegue las salidas del notebook en lugar de transcribirlas a mano. Cuatro páginas como máximo. Las preguntas son las mismas que aparecen al final del notebook:
 
-1. **Corpus.** ¿Cuántos documentos publica el índice y cuántas actas entraron al grafo? Justifique el corte de cuatro actas y dos páginas, y explique qué haría el notebook con un PDF escaneado.
-2. **Modelo de datos.** Incluya la captura del navegador de Neo4j (paso 6.3). Explique por qué `cargo` es una propiedad de `PARTICIPA_EN` y no de `Persona`.
-3. **Uno y dos saltos.** Pegue sus consultas de los TODO 3 y 4 con su resultado. Compárelas con el SQL equivalente: ¿cuántos `JOIN` necesitaría un tercer salto?
-4. **Idempotencia.** ¿Qué pasó, o qué habría pasado, si en el TODO 1 usaba `CREATE` en lugar de `MERGE`? Relaciónelo con el Laboratorio 3.
-5. **Recuperación.** Con la salida del TODO 5, compare «solo vector» con «vector + acta». ¿Por qué la búsqueda solo por vector puede equivocarse de acta? Use la salida del paso 8.2: ¿qué papel juega que el codificador lea solo los primeros 128 tokens de cada fragmento?
-6. **El modelo.** Para cada una de las tres preguntas del paso 9, diga si la respuesta es correcta según el contexto recuperado. Si el modelo afirma algo que no está en ese contexto, señálelo. Identificar una alucinación suma puntos; no es un defecto que haya que ocultar.
-7. **Límite.** En una o dos oraciones: ¿qué tenía el conjunto de réplicas del Laboratorio 3 que este Neo4j no tiene?
+1. ¿Cuántos documentos publica el índice y cuántas actas entraron al grafo? ¿Qué haríamos si solo contamos con un PDF escaneado.
+2. Incluya la captura del navegador de Neo4j (paso 6.3). Explique por qué `cargo` es una propiedad de `PARTICIPA_EN` y no de `Persona`.
+3. Pegue sus consultas de los TODO 3 y 4, con su resultado. Compárelas con el SQL equivalente: ¿cuántos `JOIN` necesitaría un tercer salto?
+4. ¿Qué pasó, o qué habría pasado, si en el TODO 1 usaba `CREATE` en lugar de `MERGE`? 
+5. Con la salida del TODO 5, compare «solo vector» con «vector + acta». ¿Por qué usando solo el vector puede equivocarse de acta? Use la salida del paso 8.2: ¿qué papel juega que el codificador lea solo los primeros 128 tokens de cada fragmento?
+6. Para cada una de las tres preguntas del paso 9, diga si la respuesta es correcta según el contexto recuperado. Si el modelo afirma algo que no está en ese contexto, señálelo: identificar una alucinación es parte de la evaluación, no un defecto a ocultar.
 
 ## 6. Rúbrica (100 puntos, se escala a 2,5 %)
 
@@ -107,6 +103,6 @@ Pegue las salidas del notebook en lugar de transcribirlas a mano. Cuatro página
 | Consultas de uno y dos saltos (TODO 3 y 4) | 20 | verificaciones en `OK`, consultas y resultado en el informe, comparación con SQL (pregunta 3) |
 | Recuperación por vector y por camino (TODO 5) | 20 | verificación en `OK` y una comparación razonada entre «solo vector» y «vector + acta» (pregunta 5) |
 | Lectura crítica del modelo | 20 | las tres respuestas evaluadas contra el contexto, con las alucinaciones señaladas (pregunta 6) |
-| Delimitación y límites | 15 | preguntas 1 y 7, con cifras tomadas de la salida |
+| Delimitación y límites | 15 | pregunta 1, con cifras tomadas del output |
 
-**Topes.** Si el informe no trae salidas del notebook, cada criterio que dependa de una cifra vale la mitad. Un TODO que queda en `PENDIENTE` o en `VERIFICACIÓN FALLÓ` no suma la parte de código de su criterio; el análisis escrito se califica aparte.
+**IMPORTANTE.** Si el informe no trae salidas del notebook, cada criterio que dependa de una cifra vale la mitad. Un TODO que queda en `PENDIENTE` o en `VERIFICACIÓN FALLÓ` no suma la parte de código de su criterio; el análisis escrito se califica aparte.
