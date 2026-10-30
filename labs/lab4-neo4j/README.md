@@ -1,8 +1,8 @@
 # Laboratorio 4 — Actas municipales en un grafo
 
 **Valor:** 2,5 % del curso · **Equipos:** tres personas  
-**Asignación:** miércoles 4 de noviembre de 2026 · **Plazo:** 2 semanas  
-**Entrega:** miércoles 18 de noviembre de 2026, 11:00 pm. Un informe en PDF por equipo (máximo 4 páginas) en TEC Digital, con el enlace al repositorio donde está el notebook completado.
+**Asignación:** miércoles 28 de octubre de 2026 · **Plazo:** 2 semanas  
+**Entrega:** miércoles 11 de noviembre de 2026, 11:00 pm. Un informe en PDF por equipo (máximo 4 páginas) en TEC Digital, con el enlace al repositorio donde está el notebook completado.
 
 **Motor:** Neo4j 5 Community, un solo nodo.  
 **Notebook:** [`Lab4.ipynb`](Lab4.ipynb)  
